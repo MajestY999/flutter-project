@@ -46,3 +46,21 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+.claude/
+.claude.json
+.mcp.json
+CLAUDE.local.md
+
+# Firebase app configuration (generated per developer/project)
+**/firebase_options.dart
+**/google-services.json
+**/GoogleService-Info.plist
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

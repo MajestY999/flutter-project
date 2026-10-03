@@ -41,10 +41,12 @@ FFI; в браузере SQLite хранится в IndexedDB. Карточки 
 **Sign-in method → Email/Password → Enable**. Пока этот provider не включён,
 Firebase отвечает `configuration-not-found` или `operation-not-allowed`.
 Регистрация принимает новый корректный email и пароль от 6 символов; вход
-возможен только с данными уже созданного аккаунта. Инициализация Firebase и
-платформенные параметры находятся в `lib/main.dart` и
-`lib/firebase_options.dart`. Пароль приложение не записывает в SQLite: его
-безопасно обрабатывает Firebase Authentication.
+возможен только с данными уже созданного аккаунта. После клонирования проекта
+сгенерируйте локальные параметры Firebase командой `flutterfire configure`;
+`lib/firebase_options.dart` и платформенные Firebase-конфигурации намеренно
+исключены из Git. `firebase.json` и `.firebaserc` оставлены в Git, чтобы можно
+было собирать и публиковать Hosting. Пароль приложение не записывает в SQLite:
+его безопасно обрабатывает Firebase Authentication.
 
 Для веб-сборки один раз загрузите SQLite WASM-файлы:
 

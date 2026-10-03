@@ -1,4 +1,6 @@
 // Определяет диалоги создания и редактирования карточек, профиля и действий.
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -70,6 +72,7 @@ class PersonDialogState extends State<PersonDialog> {
   void _submit() {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
+    FocusScope.of(context).unfocus();
     Navigator.of(context).pop(
       PersonFormData(
         name: name,
@@ -86,12 +89,16 @@ class PersonDialogState extends State<PersonDialog> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context);
+    final horizontalInset = screenSize.width < 360 ? 8.0 : 16.0;
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: horizontalInset,
+        vertical: 12,
+      ),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: 420,
-          maxHeight: screenSize.height - 40,
+          maxWidth: math.min(420.0, screenSize.width - horizontalInset * 2),
+          maxHeight: math.max(0.0, screenSize.height - 24),
         ),
         child: SizedBox(
           width: double.infinity,
@@ -120,7 +127,6 @@ class PersonDialogState extends State<PersonDialog> {
                           controller: _nameController,
                           label: 'Имя',
                           hint: 'Например, Саша',
-                          autofocus: true,
                         ),
                         const SizedBox(height: 13),
                         DialogTextField(
@@ -174,8 +180,7 @@ class PersonDialogState extends State<PersonDialog> {
                             ),
                           ),
                           value: _isSelf,
-                          onChanged: (value) =>
-                              setState(() => _isSelf = value),
+                          onChanged: (value) => setState(() => _isSelf = value),
                         ),
                       ],
                     ),
@@ -201,9 +206,7 @@ class PersonDialogState extends State<PersonDialog> {
                         backgroundColor: AppColors.lime,
                       ),
                       child: Text(
-                        widget.initialPerson == null
-                            ? 'Добавить'
-                            : 'Сохранить',
+                        widget.initialPerson == null ? 'Добавить' : 'Сохранить',
                       ),
                     ),
                   ],
@@ -218,7 +221,8 @@ class PersonDialogState extends State<PersonDialog> {
 }
 
 class DialogTextField extends StatelessWidget {
-  const DialogTextField({super.key, 
+  const DialogTextField({
+    super.key,
     required this.controller,
     required this.label,
     required this.hint,
@@ -247,7 +251,7 @@ class DialogTextField extends StatelessWidget {
           ? [FilteringTextInputFormatter.digitsOnly]
           : null,
       textCapitalization: TextCapitalization.sentences,
-      style: const TextStyle(fontSize: 13),
+      style: const TextStyle(fontSize: 16),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

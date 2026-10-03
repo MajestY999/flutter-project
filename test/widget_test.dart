@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:my_app/data/people_repository.dart';
 import 'package:my_app/models/tracked_person.dart';
 import 'package:my_app/app.dart';
+import 'package:my_app/presentation/navigation.dart';
 
 void main() {
   testWidgets('shows the promise tracker dashboard', (tester) async {
@@ -28,7 +29,7 @@ void main() {
       const Offset(0, -450),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Инфляция обещаний'), findsOneWidget);
+    expect(find.text('График обещаний'), findsOneWidget);
   });
 
   testWidgets('opens analytics and people tabs', (tester) async {
@@ -173,11 +174,26 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.descendant(of: dialog, matching: find.text('Сдержано')), findsOneWidget);
-    expect(find.descendant(of: dialog, matching: find.text('Не сдержано')), findsOneWidget);
-    expect(find.descendant(of: dialog, matching: find.text('2')), findsOneWidget);
-    expect(find.descendant(of: dialog, matching: find.text('8')), findsOneWidget);
-    expect(find.descendant(of: dialog, matching: find.text('20%')), findsOneWidget);
+    expect(
+      find.descendant(of: dialog, matching: find.text('Сдержано')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: dialog, matching: find.text('Не сдержано')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: dialog, matching: find.text('2')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: dialog, matching: find.text('8')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: dialog, matching: find.text('20%')),
+      findsOneWidget,
+    );
 
     final dialogRect = tester.getRect(dialog);
     expect(dialogRect.left, greaterThanOrEqualTo(0));
@@ -187,6 +203,31 @@ void main() {
     await tester.tap(find.text('Готово'));
     await tester.pumpAndSettle();
     expect(dialog, findsNothing);
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('last promise actions stay above mobile browser controls', (
+    tester,
+  ) async {
+    const viewport = Size(320, 640);
+    await tester.binding.setSurfaceSize(viewport);
+    await tester.pumpWidget(MyApp(repository: _MemoryPeopleRepository()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Люди').last);
+    await tester.pumpAndSettle();
+    final peopleList = find.byKey(const PageStorageKey('people'));
+    await tester.drag(peopleList, const Offset(0, -2000));
+    await tester.pumpAndSettle();
+
+    final lastAction = find.byKey(const ValueKey('record-broken-Илья'));
+    final actionRect = tester.getRect(lastAction);
+    expect(actionRect.bottom, lessThanOrEqualTo(viewport.height - 80));
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(lastAction);
+    await tester.pumpAndSettle();
+    expect(find.text('5 срывов'), findsOneWidget);
     await tester.binding.setSurfaceSize(null);
   });
 
@@ -207,6 +248,14 @@ void main() {
     await tester.pumpWidget(MyApp(repository: repository));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull, reason: 'initial mobile dashboard');
+    expect(find.text('Обзор'), findsOneWidget);
+    final navigationSafeArea = tester.widget<SafeArea>(
+      find.descendant(
+        of: find.byType(BottomNavigation),
+        matching: find.byType(SafeArea),
+      ),
+    );
+    expect(navigationSafeArea.maintainBottomViewPadding, isTrue);
 
     await tester.tap(find.text('Люди').last);
     await tester.pumpAndSettle();
@@ -224,6 +273,22 @@ void main() {
       of: dialog,
       matching: find.byType(TextField),
     );
+    tester.view.viewInsets = const FakeViewPadding(bottom: 260);
+    await tester.pumpAndSettle();
+    final keyboardDialogRect = tester.getRect(dialog);
+    expect(keyboardDialogRect.left, greaterThanOrEqualTo(0));
+    expect(keyboardDialogRect.right, lessThanOrEqualTo(viewport.width));
+    expect(tester.takeException(), isNull, reason: 'mobile keyboard open');
+    tester.view.resetViewInsets();
+    await tester.pumpAndSettle();
+    expect(find.text('Обзор'), findsOneWidget);
+    final overviewTabRect = tester.getRect(find.text('Обзор'));
+    expect(overviewTabRect.bottom, lessThanOrEqualTo(viewport.height));
+    expect(overviewTabRect.bottom, greaterThan(viewport.height - 80));
+
+    final nameField = tester.widget<TextField>(dialogFields.first);
+    expect(nameField.autofocus, isFalse);
+    expect(nameField.style?.fontSize, greaterThanOrEqualTo(16));
     await tester.enterText(dialogFields.first, 'Очень длинное имя');
     await tester.enterText(
       dialogFields.last,
@@ -236,6 +301,8 @@ void main() {
     await tester.ensureVisible(addButton);
     await tester.tap(addButton);
     await tester.pumpAndSettle();
+    expect(find.byType(Dialog), findsNothing);
+    expect(find.text('Обзор'), findsOneWidget);
 
     expect(
       repository._people?.any((person) => person.name == 'Очень длинное имя'),

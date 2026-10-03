@@ -98,7 +98,7 @@ class AnalyticsTab extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Инфляция обещаний',
+                      'График обещаний',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,

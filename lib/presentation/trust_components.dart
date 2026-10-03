@@ -21,8 +21,11 @@ class TrustCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = levelForStats(trust: trust, kept: kept).name;
+    final isNarrow = MediaQuery.sizeOf(context).width < 360;
+    final padding = isNarrow ? 14.0 : 20.0;
+    final gaugeSize = isNarrow ? 78.0 : 108.0;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -142,14 +145,14 @@ class TrustCard extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               SizedBox(
-                width: 108,
-                height: 108,
+                width: gaugeSize,
+                height: gaugeSize,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     SizedBox(
-                      width: 98,
-                      height: 98,
+                      width: gaugeSize - 10,
+                      height: gaugeSize - 10,
                       child: CircularProgressIndicator(
                         value: trust / 100,
                         strokeWidth: 8,

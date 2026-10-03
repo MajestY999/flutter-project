@@ -113,7 +113,7 @@ class OverviewTab extends StatelessWidget {
                 ),
               const SizedBox(height: 20),
               SectionHeading(
-                title: 'Инфляция обещаний',
+                title: 'График обещаний',
                 subtitle: 'за последние 7 дней',
                 actionLabel: 'Подробнее',
                 onAction: onViewAnalytics,
@@ -153,72 +153,79 @@ class TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: AppColors.lime,
-            borderRadius: BorderRadius.circular(13),
-          ),
-          child: const Icon(
-            Icons.bolt_rounded,
-            color: AppColors.background,
-            size: 23,
-          ),
-        ),
-        const SizedBox(width: 10),
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 280;
+        return Row(
           children: [
-            Text(
-              'GHOSTING',
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.15,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.2,
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: AppColors.lime,
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: const Icon(
+                Icons.bolt_rounded,
+                color: AppColors.background,
+                size: 23,
               ),
             ),
-            Text(
-              'PROMISE TRACKER',
-              style: TextStyle(
-                fontSize: 8,
-                color: AppColors.muted,
-                letterSpacing: 1.25,
+            if (!isCompact) ...[
+              const SizedBox(width: 10),
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'GHOSTING',
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.15,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  Text(
+                    'PROMISE TRACKER',
+                    style: TextStyle(
+                      fontSize: 8,
+                      color: AppColors.muted,
+                      letterSpacing: 1.25,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const Spacer(),
+            IconActionButton(
+              icon: Icons.add_rounded,
+              label: 'Добавить человека',
+              onPressed: onAdd,
+            ),
+            if (onSignOut != null) ...[
+              const SizedBox(width: 8),
+              IconActionButton(
+                icon: Icons.logout_rounded,
+                label: 'Выйти из аккаунта',
+                onPressed: onSignOut!,
+              ),
+            ],
+            const SizedBox(width: 9),
+            Tooltip(
+              message: 'Редактировать профиль',
+              child: InkWell(
+                mouseCursor: SystemMouseCursors.click,
+                onTap: onProfile,
+                customBorder: const CircleBorder(),
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: ProfileAvatar(name: profileName, size: 38),
+                ),
               ),
             ),
           ],
-        ),
-        const Spacer(),
-        IconActionButton(
-          icon: Icons.add_rounded,
-          label: 'Добавить человека',
-          onPressed: onAdd,
-        ),
-        if (onSignOut != null) ...[
-          const SizedBox(width: 8),
-          IconActionButton(
-            icon: Icons.logout_rounded,
-            label: 'Выйти из аккаунта',
-            onPressed: onSignOut!,
-          ),
-        ],
-        const SizedBox(width: 9),
-        Tooltip(
-          message: 'Редактировать профиль',
-          child: InkWell(
-            mouseCursor: SystemMouseCursors.click,
-            onTap: onProfile,
-            customBorder: const CircleBorder(),
-            child: Padding(
-              padding: const EdgeInsets.all(2),
-              child: ProfileAvatar(name: profileName, size: 38),
-            ),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

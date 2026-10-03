@@ -73,7 +73,7 @@ class PeopleTab extends StatelessWidget {
             ),
           ),
         const SliverPadding(
-          padding: EdgeInsets.fromLTRB(22, 12, 22, 28),
+          padding: EdgeInsets.fromLTRB(22, 12, 22, 120),
           sliver: SliverToBoxAdapter(child: GhostingFooter()),
         ),
       ],

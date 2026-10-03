@@ -30,6 +30,7 @@ class BottomNavigation extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
+        maintainBottomViewPadding: true,
         child: SizedBox(
           height: 65,
           child: Row(

@@ -53,6 +53,7 @@ app.*.map.json
 !.env.example
 .claude/
 .claude.json
+.agents/
 .mcp.json
 CLAUDE.local.md
 

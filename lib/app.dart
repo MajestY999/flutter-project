@@ -1,17 +1,22 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'data/people_repository.dart';
 import 'models/tracked_person.dart';
 import 'presentation/analytics_page.dart';
+import 'presentation/auth_gate.dart';
 import 'presentation/dialogs.dart';
 import 'presentation/navigation.dart';
 import 'presentation/overview_widgets.dart';
 import 'presentation/people_page.dart';
+import 'presentation/profile_page.dart';
 import 'theme/app_colors.dart';
 import 'state/ghosting_controller.dart';
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, this.repository});
+
+  final PeopleRepository? repository;
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +48,45 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const GhostingHome(),
+      home: repository == null
+          ? AuthGate(
+              authenticatedBuilder: (user) => GhostingHome(
+                key: ValueKey(user.uid),
+                repository: SqlitePeopleRepository(
+                  accountId: user.uid,
+                  showSampleDataWhenEmpty: false,
+                ),
+                initialProfileName: user.displayName?.trim().isNotEmpty == true
+                    ? user.displayName!.trim()
+                    : user.email?.split('@').first ?? 'Пользователь',
+                accountEmail: user.email,
+                onSignOut: FirebaseAuth.instance.signOut,
+                onAccountNameChanged: (name) async {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user != null) await user.updateDisplayName(name);
+                },
+              ),
+            )
+          : GhostingHome(repository: repository!),
     );
   }
 }
 
 class GhostingHome extends StatefulWidget {
-  const GhostingHome({super.key});
+  const GhostingHome({
+    super.key,
+    required this.repository,
+    this.initialProfileName = 'Алексей',
+    this.accountEmail,
+    this.onSignOut,
+    this.onAccountNameChanged,
+  });
+
+  final PeopleRepository repository;
+  final String initialProfileName;
+  final String? accountEmail;
+  final Future<void> Function()? onSignOut;
+  final Future<void> Function(String name)? onAccountNameChanged;
 
   @override
   State<GhostingHome> createState() => _GhostingHomeState();
@@ -63,7 +100,10 @@ class _GhostingHomeState extends State<GhostingHome> {
   @override
   void initState() {
     super.initState();
-    _controller = GhostingController(SharedPreferencesPeopleRepository());
+    _controller = GhostingController(
+      widget.repository,
+      initialProfileName: widget.initialProfileName,
+    );
     _load();
   }
 
@@ -100,10 +140,14 @@ class _GhostingHomeState extends State<GhostingHome> {
     }
   }
 
-  Future<void> _editPerson([TrackedPerson? person]) async {
+  Future<void> _editPerson([
+    TrackedPerson? person,
+    bool initiallySelf = false,
+  ]) async {
     final result = await showDialog<PersonFormData>(
       context: context,
-      builder: (context) => PersonDialog(initialPerson: person),
+      builder: (context) =>
+          PersonDialog(initialPerson: person, initiallySelf: initiallySelf),
     );
     if (result == null) return;
     if (person == null) {
@@ -135,15 +179,53 @@ class _GhostingHomeState extends State<GhostingHome> {
   Future<void> _editProfile() async {
     final name = await showDialog<String>(
       context: context,
-      builder: (context) =>
-          ProfileDialog(initialName: _controller.profileName),
+      builder: (context) => ProfileDialog(initialName: _controller.profileName),
     );
     if (name == null || name.trim().isEmpty) return;
     await _runAction(
-      _controller.updateProfileName(name.trim()),
+      _saveProfileName(name.trim()),
       successMessage: 'Профиль обновлён.',
     );
   }
+
+  Future<void> _saveProfileName(String name) async {
+    await _controller.updateProfileName(name);
+    await widget.onAccountNameChanged?.call(name);
+  }
+
+  Future<void> _signOut() async {
+    final signOut = widget.onSignOut;
+    if (signOut == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Выйти из аккаунта?'),
+        content: const Text(
+          'Локальные карточки останутся сохранены в аккаунте на этом устройстве.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Отмена'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Выйти'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await signOut();
+    } catch (error) {
+      if (mounted) _showMessage('Не удалось выйти из аккаунта: $error');
+    }
+  }
+
+  void _openProfile() => setState(() => _selectedTab = 3);
+
+  Future<void> _createOwnProfileCard() => _editPerson(null, true);
 
   Future<void> _recordBroken(String id) => _runAction(
     _controller.recordBroken(id),
@@ -161,7 +243,9 @@ class _GhostingHomeState extends State<GhostingHome> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Удалить карточку?'),
-        content: Text('Записи ${person.name} будут удалены с этого устройства.'),
+        content: Text(
+          'Записи ${person.name} будут удалены с этого устройства.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -208,7 +292,10 @@ class _GhostingHomeState extends State<GhostingHome> {
                       style: const TextStyle(color: AppColors.muted),
                     ),
                     const SizedBox(height: 12),
-                    FilledButton(onPressed: _load, child: const Text('Повторить')),
+                    FilledButton(
+                      onPressed: _load,
+                      child: const Text('Повторить'),
+                    ),
                   ],
                 ),
               ),
@@ -216,6 +303,8 @@ class _GhostingHomeState extends State<GhostingHome> {
           );
         }
 
+        final ownCards = _controller.people.where((person) => person.isSelf);
+        final ownCard = ownCards.isEmpty ? null : ownCards.first;
         final pages = [
           OverviewTab(
             people: _controller.people,
@@ -223,11 +312,12 @@ class _GhostingHomeState extends State<GhostingHome> {
             trust: _controller.trust,
             totalBroken: _controller.totalBroken,
             onAddPerson: _editPerson,
-            onEditProfile: _editProfile,
+            onEditProfile: _openProfile,
             onRecordBroken: _recordBroken,
             onRecordKept: _recordKept,
             onViewAnalytics: () => setState(() => _selectedTab = 1),
             onViewPeople: () => setState(() => _selectedTab = 2),
+            onSignOut: widget.onSignOut == null ? null : _signOut,
           ),
           AnalyticsTab(
             people: _controller.people,
@@ -242,6 +332,15 @@ class _GhostingHomeState extends State<GhostingHome> {
             onRecordBroken: _recordBroken,
             onRecordKept: _recordKept,
             onDeletePerson: _deletePerson,
+          ),
+          ProfileTab(
+            name: _controller.profileName,
+            person: ownCard,
+            onBack: () => setState(() => _selectedTab = 0),
+            onEditName: _editProfile,
+            onCreateOwnCard: _createOwnProfileCard,
+            accountEmail: widget.accountEmail,
+            onSignOut: widget.onSignOut == null ? null : _signOut,
           ),
         ];
 
@@ -264,14 +363,15 @@ class _GhostingHomeState extends State<GhostingHome> {
                             selectedIndex: _selectedTab,
                             onSelected: (index) =>
                                 setState(() => _selectedTab = index),
-                            onProfile: _editProfile,
+                            onProfile: _openProfile,
                             profileName: _controller.profileName,
                           ),
                           Expanded(
                             child: Center(
                               child: ConstrainedBox(
-                                constraints:
-                                    const BoxConstraints(maxWidth: 1120),
+                                constraints: const BoxConstraints(
+                                  maxWidth: 1120,
+                                ),
                                 child: content,
                               ),
                             ),
@@ -296,7 +396,8 @@ class _GhostingHomeState extends State<GhostingHome> {
 }
 
 class DesktopNavigation extends StatelessWidget {
-  const DesktopNavigation({super.key, 
+  const DesktopNavigation({
+    super.key,
     required this.selectedIndex,
     required this.onSelected,
     required this.onProfile,
@@ -327,12 +428,23 @@ class DesktopNavigation extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 24, 16, 30),
-            child: FittedBox(
-              alignment: Alignment.centerLeft,
-              fit: BoxFit.scaleDown,
-              child: BrandMark(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 24, 16, 30),
+            child: Tooltip(
+              message: 'Вернуться к обзору',
+              child: InkWell(
+                mouseCursor: SystemMouseCursors.click,
+                borderRadius: BorderRadius.circular(13),
+                onTap: () => onSelected(0),
+                child: const Padding(
+                  padding: EdgeInsets.all(4),
+                  child: FittedBox(
+                    alignment: Alignment.centerLeft,
+                    fit: BoxFit.scaleDown,
+                    child: BrandMark(),
+                  ),
+                ),
+              ),
             ),
           ),
           for (var i = 0; i < _items.length; i++)
@@ -344,6 +456,7 @@ class DesktopNavigation extends StatelessWidget {
             ),
           const Spacer(),
           InkWell(
+            mouseCursor: SystemMouseCursors.click,
             onTap: onProfile,
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -359,7 +472,11 @@ class DesktopNavigation extends StatelessWidget {
                       style: const TextStyle(fontSize: 13),
                     ),
                   ),
-                  const Icon(Icons.edit_outlined, size: 16, color: AppColors.muted),
+                  const Icon(
+                    Icons.edit_outlined,
+                    size: 16,
+                    color: AppColors.muted,
+                  ),
                 ],
               ),
             ),
@@ -371,7 +488,8 @@ class DesktopNavigation extends StatelessWidget {
 }
 
 class DesktopNavItem extends StatelessWidget {
-  const DesktopNavItem({super.key, 
+  const DesktopNavItem({
+    super.key,
     required this.icon,
     required this.label,
     required this.selected,
@@ -388,9 +506,12 @@ class DesktopNavItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       child: Material(
-        color: selected ? AppColors.lime.withValues(alpha: .12) : Colors.transparent,
+        color: selected
+            ? AppColors.lime.withValues(alpha: .12)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(13),
         child: InkWell(
+          mouseCursor: SystemMouseCursors.click,
           onTap: onTap,
           borderRadius: BorderRadius.circular(13),
           child: Padding(

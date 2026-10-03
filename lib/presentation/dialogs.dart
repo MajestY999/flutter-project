@@ -21,9 +21,14 @@ class PersonFormData {
 }
 
 class PersonDialog extends StatefulWidget {
-  const PersonDialog({super.key, this.initialPerson});
+  const PersonDialog({
+    super.key,
+    this.initialPerson,
+    this.initiallySelf = false,
+  });
 
   final TrackedPerson? initialPerson;
+  final bool initiallySelf;
 
   @override
   State<PersonDialog> createState() => PersonDialogState();
@@ -39,6 +44,7 @@ class PersonDialogState extends State<PersonDialog> {
   @override
   void initState() {
     super.initState();
+    _isSelf = widget.initiallySelf;
     final person = widget.initialPerson;
     if (person != null) {
       _nameController.text = person.name;
@@ -252,12 +258,14 @@ class ProfileDialogState extends State<ProfileDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      scrollable: true,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
       title: const Text('Ваш профиль'),
       content: DialogTextField(
         controller: _nameController,
         label: 'Как вас зовут?',
         hint: 'Ваше имя',
-        autofocus: true,
+        autofocus: false,
         maxLength: 30,
       ),
       actions: [

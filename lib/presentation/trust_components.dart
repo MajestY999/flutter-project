@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../models/trust_level.dart';
 import '../theme/app_colors.dart';
 
 class TrustCard extends StatelessWidget {
   const TrustCard({
     super.key,
     required this.trust,
+    required this.kept,
     required this.broken,
     required this.onAnalytics,
   });
 
   final int trust;
+  final int kept;
   final int broken;
   final VoidCallback onAnalytics;
 
   @override
   Widget build(BuildContext context) {
-    final status = trust >= 85
-        ? 'Святой человек'
-        : trust >= 65
-        ? 'Почти верим'
-        : trust >= 40
-        ? 'Кондиционер'
-        : 'Туманное будущее';
+    final status = levelForStats(trust: trust, kept: kept).name;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -196,14 +193,17 @@ class TrustCard extends StatelessWidget {
                   style: TextStyle(fontSize: 11, color: Color(0xFFD4CFDF)),
                 ),
               ),
-              GestureDetector(
-                onTap: onAnalytics,
-                child: const Text(
-                  'Анализ →',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.lime,
-                    fontWeight: FontWeight.w600,
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: onAnalytics,
+                  child: const Text(
+                    'Анализ →',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.lime,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -254,16 +254,19 @@ class SectionHeading extends StatelessWidget {
             ],
           ),
         ),
-        GestureDetector(
-          onTap: onAction,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: Text(
-              actionLabel,
-              style: const TextStyle(
-                color: AppColors.lime,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: onAction,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 2),
+              child: Text(
+                actionLabel,
+                style: const TextStyle(
+                  color: AppColors.lime,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),

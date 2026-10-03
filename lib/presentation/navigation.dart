@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 class BottomNavigation extends StatelessWidget {
-  const BottomNavigation({super.key, 
+  const BottomNavigation({
+    super.key,
     required this.selectedIndex,
     required this.onSelected,
   });
@@ -50,7 +51,8 @@ class BottomNavigation extends StatelessWidget {
 }
 
 class NavigationItem extends StatelessWidget {
-  const NavigationItem({super.key, 
+  const NavigationItem({
+    super.key,
     required this.icon,
     required this.label,
     required this.selected,
@@ -66,6 +68,7 @@ class NavigationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = selected ? AppColors.lime : AppColors.muted;
     return InkWell(
+      mouseCursor: SystemMouseCursors.click,
       onTap: onTap,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

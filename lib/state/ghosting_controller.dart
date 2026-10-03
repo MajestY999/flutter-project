@@ -4,11 +4,14 @@ import '../data/people_repository.dart';
 import '../models/tracked_person.dart';
 
 class GhostingController extends ChangeNotifier {
-  GhostingController(this._repository);
+  GhostingController(
+    this._repository, {
+    String initialProfileName = 'Алексей',
+  }) : _profileName = initialProfileName;
 
   final PeopleRepository _repository;
   List<TrackedPerson> _people = samplePeople();
-  String _profileName = 'Алексей';
+  String _profileName;
   bool _isLoading = true;
 
   List<TrackedPerson> get people => List.unmodifiable(_people);
@@ -18,7 +21,7 @@ class GhostingController extends ChangeNotifier {
   int get totalKept => _people.fold(0, (sum, person) => sum + person.kept);
   int get trust {
     final total = totalBroken + totalKept;
-    return total == 0 ? 100 : (totalKept * 100 / total).round();
+    return total == 0 ? 0 : (totalKept * 100 / total).round();
   }
 
   Future<void> load() async {
@@ -31,6 +34,8 @@ class GhostingController extends ChangeNotifier {
     if (storedPeople != null) _people = storedPeople;
     if (storedName != null && storedName.isNotEmpty) {
       _profileName = storedName;
+    } else {
+      await _repository.saveProfileName(_profileName);
     }
     _isLoading = false;
     notifyListeners();

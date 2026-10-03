@@ -8,7 +8,8 @@ import 'person_components.dart';
 import 'trust_components.dart';
 
 class OverviewTab extends StatelessWidget {
-  const OverviewTab({super.key, 
+  const OverviewTab({
+    super.key,
     required this.people,
     required this.profileName,
     required this.trust,
@@ -19,6 +20,7 @@ class OverviewTab extends StatelessWidget {
     required this.onRecordKept,
     required this.onViewAnalytics,
     required this.onViewPeople,
+    this.onSignOut,
   });
 
   final List<TrackedPerson> people;
@@ -31,6 +33,7 @@ class OverviewTab extends StatelessWidget {
   final ValueChanged<String> onRecordKept;
   final VoidCallback onViewAnalytics;
   final VoidCallback onViewPeople;
+  final VoidCallback? onSignOut;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +50,7 @@ class OverviewTab extends StatelessWidget {
                 onAdd: onAddPerson,
                 onProfile: onEditProfile,
                 profileName: profileName,
+                onSignOut: onSignOut,
               ),
               const SizedBox(height: 26),
               Text(
@@ -66,6 +70,7 @@ class OverviewTab extends StatelessWidget {
               const SizedBox(height: 22),
               TrustCard(
                 trust: trust,
+                kept: people.fold(0, (sum, person) => sum + person.kept),
                 broken: totalBroken,
                 onAnalytics: onViewAnalytics,
               ),
@@ -127,15 +132,18 @@ String greeting(int hour) {
 }
 
 class TopBar extends StatelessWidget {
-  const TopBar({super.key, 
+  const TopBar({
+    super.key,
     required this.onAdd,
     required this.onProfile,
     required this.profileName,
+    this.onSignOut,
   });
 
   final VoidCallback onAdd;
   final VoidCallback onProfile;
   final String profileName;
+  final VoidCallback? onSignOut;
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +156,11 @@ class TopBar extends StatelessWidget {
             color: AppColors.lime,
             borderRadius: BorderRadius.circular(13),
           ),
-          child: const Icon(Icons.bolt_rounded, color: AppColors.background, size: 23),
+          child: const Icon(
+            Icons.bolt_rounded,
+            color: AppColors.background,
+            size: 23,
+          ),
         ),
         const SizedBox(width: 10),
         const Column(
@@ -165,7 +177,11 @@ class TopBar extends StatelessWidget {
             ),
             Text(
               'PROMISE TRACKER',
-              style: TextStyle(fontSize: 8, color: AppColors.muted, letterSpacing: 1.25),
+              style: TextStyle(
+                fontSize: 8,
+                color: AppColors.muted,
+                letterSpacing: 1.25,
+              ),
             ),
           ],
         ),
@@ -175,10 +191,19 @@ class TopBar extends StatelessWidget {
           label: 'Добавить человека',
           onPressed: onAdd,
         ),
+        if (onSignOut != null) ...[
+          const SizedBox(width: 8),
+          IconActionButton(
+            icon: Icons.logout_rounded,
+            label: 'Выйти из аккаунта',
+            onPressed: onSignOut!,
+          ),
+        ],
         const SizedBox(width: 9),
         Tooltip(
           message: 'Редактировать профиль',
           child: InkWell(
+            mouseCursor: SystemMouseCursors.click,
             onTap: onProfile,
             customBorder: const CircleBorder(),
             child: Padding(
@@ -193,7 +218,8 @@ class TopBar extends StatelessWidget {
 }
 
 class IconActionButton extends StatelessWidget {
-  const IconActionButton({super.key, 
+  const IconActionButton({
+    super.key,
     required this.icon,
     required this.label,
     required this.onPressed,
@@ -215,6 +241,7 @@ class IconActionButton extends StatelessWidget {
           side: BorderSide(color: Colors.white.withValues(alpha: .07)),
         ),
         child: InkWell(
+          mouseCursor: SystemMouseCursors.click,
           onTap: onPressed,
           borderRadius: BorderRadius.circular(13),
           child: SizedBox(
@@ -243,7 +270,11 @@ class BrandMark extends StatelessWidget {
             color: AppColors.lime,
             borderRadius: BorderRadius.circular(13),
           ),
-          child: const Icon(Icons.bolt_rounded, color: AppColors.background, size: 23),
+          child: const Icon(
+            Icons.bolt_rounded,
+            color: AppColors.background,
+            size: 23,
+          ),
         ),
         const SizedBox(width: 10),
         const Column(
@@ -260,7 +291,11 @@ class BrandMark extends StatelessWidget {
             ),
             Text(
               'PROMISE TRACKER',
-              style: TextStyle(fontSize: 8, color: AppColors.muted, letterSpacing: 1.25),
+              style: TextStyle(
+                fontSize: 8,
+                color: AppColors.muted,
+                letterSpacing: 1.25,
+              ),
             ),
           ],
         ),
@@ -289,7 +324,10 @@ class ProfileAvatar extends StatelessWidget {
       child: Center(
         child: Text(
           initial.toUpperCase(),
-          style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.violet),
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            color: AppColors.violet,
+          ),
         ),
       ),
     );

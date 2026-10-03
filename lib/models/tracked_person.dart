@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'trust_level.dart';
+
 const _avatarColors = <Color>[
   Color(0xFFAA8FFF),
   Color(0xFFFF9B85),
@@ -32,15 +34,10 @@ class TrackedPerson {
   final List<int> history;
 
   int get total => broken + kept;
-  int get trust => total == 0 ? 100 : (kept * 100 / total).round();
+  int get trust => total == 0 ? 0 : (kept * 100 / total).round();
   Color get avatarColor => Color(color);
 
-  String get status {
-    if (trust >= 85) return 'Святой человек';
-    if (trust >= 65) return 'Человек слова';
-    if (trust >= 40) return 'Политик I ранга';
-    return 'Главный призрак';
-  }
+  String get status => levelForStats(trust: trust, kept: kept).name;
 
   TrackedPerson copyWith({
     String? name,

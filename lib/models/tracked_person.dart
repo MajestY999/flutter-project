@@ -1,3 +1,4 @@
+// Определяет модель карточки обещаний, её статистику и демонстрационные данные.
 import 'package:flutter/material.dart';
 
 import 'trust_level.dart';

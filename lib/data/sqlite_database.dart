@@ -1,3 +1,4 @@
+// Выбирает реализацию открытия SQLite, подходящую для текущей платформы.
 import 'package:sqflite_common/sqlite_api.dart';
 
 import 'sqlite_database_stub.dart'

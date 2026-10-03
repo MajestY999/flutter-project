@@ -1,3 +1,4 @@
+// Управляет списком людей, статистикой, профилем и сохранением изменений.
 import 'package:flutter/foundation.dart';
 
 import '../data/people_repository.dart';

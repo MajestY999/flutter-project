@@ -1,3 +1,4 @@
+// Показывает сводную статистику, историю обещаний и рейтинг людей.
 import 'package:flutter/material.dart';
 
 import '../models/tracked_person.dart';

@@ -1,3 +1,4 @@
+// Проверяет основные пользовательские сценарии и адаптивность экранов приложения.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -144,6 +145,51 @@ void main() {
     expect(find.text('27% доверия'), findsOneWidget);
   });
 
+  testWidgets('opens a promise card to show its details on mobile', (
+    tester,
+  ) async {
+    const viewport = Size(320, 640);
+    await tester.binding.setSurfaceSize(viewport);
+    await tester.pumpWidget(MyApp(repository: _MemoryPeopleRepository()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Люди').last);
+    await tester.pumpAndSettle();
+    final card = find.byKey(const ValueKey('person-card-mark'));
+    await tester.ensureVisible(card);
+    await tester.tap(card);
+    await tester.pumpAndSettle();
+
+    final dialog = find.byType(Dialog);
+    expect(dialog, findsOneWidget);
+    expect(
+      find.descendant(of: dialog, matching: find.text('Марк')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: dialog,
+        matching: find.text('«На следующей неделе точно»'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.descendant(of: dialog, matching: find.text('Сдержано')), findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.text('Не сдержано')), findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.text('2')), findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.text('8')), findsOneWidget);
+    expect(find.descendant(of: dialog, matching: find.text('20%')), findsOneWidget);
+
+    final dialogRect = tester.getRect(dialog);
+    expect(dialogRect.left, greaterThanOrEqualTo(0));
+    expect(dialogRect.right, lessThanOrEqualTo(viewport.width));
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Готово'));
+    await tester.pumpAndSettle();
+    expect(dialog, findsNothing);
+    await tester.binding.setSurfaceSize(null);
+  });
+
   testWidgets('fits a narrow phone screen', (tester) async {
     await tester.binding.setSurfaceSize(const Size(360, 800));
     await tester.pumpWidget(MyApp(repository: _MemoryPeopleRepository()));
@@ -151,6 +197,69 @@ void main() {
 
     expect(find.text('GHOSTING'), findsOneWidget);
     expect(tester.takeException(), isNull);
+    await tester.binding.setSurfaceSize(null);
+  });
+
+  testWidgets('adding a person fits a narrow mobile viewport', (tester) async {
+    const viewport = Size(320, 640);
+    await tester.binding.setSurfaceSize(viewport);
+    final repository = _MemoryPeopleRepository();
+    await tester.pumpWidget(MyApp(repository: repository));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'initial mobile dashboard');
+
+    await tester.tap(find.text('Люди').last);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'mobile people list');
+    await tester.tap(find.text('Добавить обещателя'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'mobile add-person dialog');
+
+    final dialogRect = tester.getRect(find.byType(Dialog));
+    expect(dialogRect.left, greaterThanOrEqualTo(0));
+    expect(dialogRect.right, lessThanOrEqualTo(viewport.width));
+
+    final dialog = find.byType(Dialog);
+    final dialogFields = find.descendant(
+      of: dialog,
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(dialogFields.first, 'Очень длинное имя');
+    await tester.enterText(
+      dialogFields.last,
+      'Обещание, которое помещается на узком экране',
+    );
+    final addButton = find.descendant(
+      of: dialog,
+      matching: find.text('Добавить'),
+    );
+    await tester.ensureVisible(addButton);
+    await tester.tap(addButton);
+    await tester.pumpAndSettle();
+
+    expect(
+      repository._people?.any((person) => person.name == 'Очень длинное имя'),
+      isTrue,
+    );
+    await tester.drag(
+      find.byType(CustomScrollView).last,
+      const Offset(0, -1000),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Очень длинное имя'), findsOneWidget);
+    final addedPerson = repository._people!.last;
+    final cardRect = tester.getRect(
+      find.byKey(ValueKey('person-card-${addedPerson.id}')),
+    );
+    final actionRect = tester.getRect(
+      find.byKey(ValueKey('record-broken-${addedPerson.name}')),
+    );
+    expect(cardRect.left, greaterThanOrEqualTo(0));
+    expect(cardRect.right, lessThanOrEqualTo(viewport.width));
+    expect(actionRect.left, greaterThanOrEqualTo(0));
+    expect(actionRect.right, lessThanOrEqualTo(viewport.width));
+    expect(tester.takeException(), isNull);
+
     await tester.binding.setSurfaceSize(null);
   });
 

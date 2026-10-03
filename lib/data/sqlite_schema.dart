@@ -1,3 +1,4 @@
+// Описывает таблицы SQLite и изменения схемы при обновлении приложения.
 import 'package:sqflite_common/sqlite_api.dart';
 
 Future<void> createGhostingSchema(Database database, int version) async {

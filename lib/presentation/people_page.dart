@@ -1,3 +1,4 @@
+// Показывает список карточек и кнопку добавления нового человека.
 import 'package:flutter/material.dart';
 
 import '../models/tracked_person.dart';
@@ -10,6 +11,7 @@ class PeopleTab extends StatelessWidget {
     required this.people,
     required this.onAddPerson,
     required this.onEditPerson,
+    this.onOpenPerson,
     required this.onRecordBroken,
     required this.onRecordKept,
     required this.onDeletePerson,
@@ -18,6 +20,7 @@ class PeopleTab extends StatelessWidget {
   final List<TrackedPerson> people;
   final VoidCallback onAddPerson;
   final ValueChanged<TrackedPerson> onEditPerson;
+  final ValueChanged<TrackedPerson>? onOpenPerson;
   final ValueChanged<String> onRecordBroken;
   final ValueChanged<String> onRecordKept;
   final ValueChanged<String> onDeletePerson;
@@ -59,6 +62,9 @@ class PeopleTab extends StatelessWidget {
                     person: person,
                     onRecordBroken: () => onRecordBroken(person.id),
                     onRecordKept: () => onRecordKept(person.id),
+                    onTap: onOpenPerson == null
+                        ? null
+                        : () => onOpenPerson!(person),
                     onEdit: () => onEditPerson(person),
                     onDelete: () => onDeletePerson(person.id),
                   ),

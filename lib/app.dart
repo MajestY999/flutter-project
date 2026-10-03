@@ -1,3 +1,4 @@
+// Собирает приложение, управляет вкладками и связывает интерфейс с состоянием.
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -9,6 +10,7 @@ import 'presentation/dialogs.dart';
 import 'presentation/navigation.dart';
 import 'presentation/overview_widgets.dart';
 import 'presentation/people_page.dart';
+import 'presentation/person_details_dialog.dart';
 import 'presentation/profile_page.dart';
 import 'theme/app_colors.dart';
 import 'state/ghosting_controller.dart';
@@ -125,7 +127,11 @@ class _GhostingHomeState extends State<GhostingHome> {
   void _showMessage(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message, maxLines: 2, overflow: TextOverflow.ellipsis),
+        ),
+      );
   }
 
   Future<void> _runAction(
@@ -174,6 +180,13 @@ class _GhostingHomeState extends State<GhostingHome> {
         successMessage: 'Карточка ${result.name} обновлена.',
       );
     }
+  }
+
+  Future<void> _showPersonDetails(TrackedPerson person) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => PersonDetailsDialog(person: person),
+    );
   }
 
   Future<void> _editProfile() async {
@@ -315,6 +328,7 @@ class _GhostingHomeState extends State<GhostingHome> {
             onEditProfile: _openProfile,
             onRecordBroken: _recordBroken,
             onRecordKept: _recordKept,
+            onOpenPerson: _showPersonDetails,
             onViewAnalytics: () => setState(() => _selectedTab = 1),
             onViewPeople: () => setState(() => _selectedTab = 2),
             onSignOut: widget.onSignOut == null ? null : _signOut,
@@ -329,6 +343,7 @@ class _GhostingHomeState extends State<GhostingHome> {
             people: _controller.people,
             onAddPerson: _editPerson,
             onEditPerson: _editPerson,
+            onOpenPerson: _showPersonDetails,
             onRecordBroken: _recordBroken,
             onRecordKept: _recordKept,
             onDeletePerson: _deletePerson,

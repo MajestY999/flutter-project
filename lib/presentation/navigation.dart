@@ -1,3 +1,4 @@
+// Создаёт нижнюю навигацию для переключения между мобильными вкладками.
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';

@@ -1,3 +1,4 @@
+// Определяет, показывать экран входа или приложение для вошедшего пользователя.
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

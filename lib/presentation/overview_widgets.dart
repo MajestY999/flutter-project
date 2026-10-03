@@ -1,3 +1,4 @@
+// Собирает обзорный экран: приветствие, доверие, карточки людей и мини-график.
 import 'package:flutter/material.dart';
 
 import '../models/tracked_person.dart';
@@ -18,6 +19,7 @@ class OverviewTab extends StatelessWidget {
     required this.onEditProfile,
     required this.onRecordBroken,
     required this.onRecordKept,
+    this.onOpenPerson,
     required this.onViewAnalytics,
     required this.onViewPeople,
     this.onSignOut,
@@ -31,6 +33,7 @@ class OverviewTab extends StatelessWidget {
   final VoidCallback onEditProfile;
   final ValueChanged<String> onRecordBroken;
   final ValueChanged<String> onRecordKept;
+  final ValueChanged<TrackedPerson>? onOpenPerson;
   final VoidCallback onViewAnalytics;
   final VoidCallback onViewPeople;
   final VoidCallback? onSignOut;
@@ -97,6 +100,9 @@ class OverviewTab extends StatelessWidget {
                           person: entry.value,
                           onRecordBroken: () => onRecordBroken(entry.value.id),
                           onRecordKept: () => onRecordKept(entry.value.id),
+                          onTap: onOpenPerson == null
+                              ? null
+                              : () => onOpenPerson!(entry.value),
                         ),
                       ),
                     ),

@@ -1,3 +1,4 @@
+// Проверяет сохранение, загрузку и миграцию данных репозитория на SQLite.
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';

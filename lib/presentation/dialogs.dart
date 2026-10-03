@@ -1,3 +1,4 @@
+// Определяет диалоги создания и редактирования карточек, профиля и действий.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -84,89 +85,134 @@ class PersonDialogState extends State<PersonDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      titlePadding: const EdgeInsets.fromLTRB(22, 21, 22, 0),
-      contentPadding: const EdgeInsets.fromLTRB(22, 14, 22, 8),
-      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-      title: Text(
-        widget.initialPerson == null ? 'Кого записываем?' : 'Изменить карточку',
-        style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
-      ),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            DialogTextField(
-              controller: _nameController,
-              label: 'Имя',
-              hint: 'Например, Саша',
-              autofocus: true,
-            ),
-            const SizedBox(height: 13),
-            DialogTextField(
-              controller: _promiseController,
-              label: 'Главное обещание',
-              hint: 'Позвоню на выходных',
-              maxLength: 60,
-            ),
-            if (widget.initialPerson != null) ...[
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: DialogTextField(
-                      controller: _brokenController,
-                      label: 'Срывы',
-                      hint: '0',
-                      keyboardType: TextInputType.number,
-                      digitsOnly: true,
+    final screenSize = MediaQuery.sizeOf(context);
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 420,
+          maxHeight: screenSize.height - 40,
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  widget.initialPerson == null
+                      ? 'Кого записываем?'
+                      : 'Изменить карточку',
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        DialogTextField(
+                          controller: _nameController,
+                          label: 'Имя',
+                          hint: 'Например, Саша',
+                          autofocus: true,
+                        ),
+                        const SizedBox(height: 13),
+                        DialogTextField(
+                          controller: _promiseController,
+                          label: 'Главное обещание',
+                          hint: 'Позвоню на выходных',
+                          maxLength: 60,
+                        ),
+                        if (widget.initialPerson != null) ...[
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: DialogTextField(
+                                  controller: _brokenController,
+                                  label: 'Срывы',
+                                  hint: '0',
+                                  keyboardType: TextInputType.number,
+                                  digitsOnly: true,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: DialogTextField(
+                                  controller: _keptController,
+                                  label: 'Сдержано',
+                                  hint: '0',
+                                  keyboardType: TextInputType.number,
+                                  digitsOnly: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        const SizedBox(height: 6),
+                        SwitchListTile.adaptive(
+                          contentPadding: EdgeInsets.zero,
+                          activeTrackColor: AppColors.lime,
+                          title: const Text(
+                            'Это я',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: const Text(
+                            'Следим и за своими обещаниями',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.muted,
+                            ),
+                          ),
+                          value: _isSelf,
+                          onChanged: (value) =>
+                              setState(() => _isSelf = value),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: DialogTextField(
-                      controller: _keptController,
-                      label: 'Сдержано',
-                      hint: '0',
-                      keyboardType: TextInputType.number,
-                      digitsOnly: true,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text(
+                        'Отмена',
+                        style: TextStyle(color: AppColors.muted),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-            const SizedBox(height: 6),
-            SwitchListTile.adaptive(
-              contentPadding: EdgeInsets.zero,
-              activeTrackColor: AppColors.lime,
-              title: const Text(
-                'Это я',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              ),
-              subtitle: const Text(
-                'Следим и за своими обещаниями',
-                style: TextStyle(fontSize: 10, color: AppColors.muted),
-              ),
-              value: _isSelf,
-              onChanged: (value) => setState(() => _isSelf = value),
+                    FilledButton(
+                      onPressed: _submit,
+                      style: FilledButton.styleFrom(
+                        foregroundColor: AppColors.background,
+                        backgroundColor: AppColors.lime,
+                      ),
+                      child: Text(
+                        widget.initialPerson == null
+                            ? 'Добавить'
+                            : 'Сохранить',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Отмена', style: TextStyle(color: AppColors.muted)),
-        ),
-        FilledButton(
-          onPressed: _submit,
-          style: FilledButton.styleFrom(
-            foregroundColor: AppColors.background,
-            backgroundColor: AppColors.lime,
           ),
-          child: Text(widget.initialPerson == null ? 'Добавить' : 'Сохранить'),
         ),
-      ],
+      ),
     );
   }
 }

@@ -1,3 +1,4 @@
+// Рисует графики динамики обещаний для главного экрана и аналитики.
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 

@@ -1,3 +1,4 @@
+// Содержит общие цвета приложения, чтобы интерфейс использовал единый стиль.
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {

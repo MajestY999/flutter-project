@@ -1,3 +1,4 @@
+// Загружает и сохраняет карточки и профиль через SQLite с миграцией старых данных.
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';

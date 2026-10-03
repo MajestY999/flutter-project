@@ -1,3 +1,4 @@
+// Предоставляет формы регистрации, входа и восстановления пароля через Firebase.
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

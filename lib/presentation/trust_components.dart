@@ -1,3 +1,4 @@
+// Рисует индекс доверия и заголовки разделов обзорного интерфейса.
 import 'package:flutter/material.dart';
 
 import '../models/trust_level.dart';
@@ -79,30 +80,35 @@ class TrustCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '$trust',
-                          style: const TextStyle(
-                            fontSize: 58,
-                            height: .95,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -3,
-                          ),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.only(top: 4, left: 3),
-                          child: Text(
-                            '%',
-                            style: TextStyle(
-                              fontSize: 25,
-                              color: AppColors.violet,
-                              fontWeight: FontWeight.w600,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$trust',
+                            style: const TextStyle(
+                              fontSize: 58,
+                              height: .95,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -3,
                             ),
                           ),
-                        ),
-                      ],
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4, left: 3),
+                            child: Text(
+                              '%',
+                              style: TextStyle(
+                                fontSize: 25,
+                                color: AppColors.violet,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Container(

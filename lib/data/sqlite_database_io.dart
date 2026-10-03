@@ -1,3 +1,4 @@
+// Открывает SQLite-файл на мобильных устройствах и настольных системах.
 import 'dart:io';
 
 import 'package:path/path.dart' as path;

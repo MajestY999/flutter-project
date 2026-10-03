@@ -1,3 +1,4 @@
+// Проверяет расчёты процентов доверия, рангов и оставшихся обещаний.
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:my_app/models/trust_level.dart';

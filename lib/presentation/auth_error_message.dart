@@ -1,3 +1,4 @@
+// Переводит коды ошибок Firebase Authentication в понятные сообщения.
 import 'package:firebase_auth/firebase_auth.dart';
 
 String authErrorMessage(FirebaseAuthException error) {

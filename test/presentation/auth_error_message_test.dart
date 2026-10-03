@@ -1,3 +1,4 @@
+// Проверяет преобразование ошибок Firebase в понятный пользователю текст.
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_app/presentation/auth_error_message.dart';

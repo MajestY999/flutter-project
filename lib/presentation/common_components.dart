@@ -1,9 +1,11 @@
+// Содержит общие небольшие элементы интерфейса, используемые на разных экранах.
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 
 class PageHeader extends StatelessWidget {
-  const PageHeader({super.key, 
+  const PageHeader({
+    super.key,
     required this.eyebrow,
     required this.title,
     required this.subtitle,
@@ -37,7 +39,10 @@ class PageHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.muted)),
+        Text(
+          subtitle,
+          style: const TextStyle(fontSize: 12, color: AppColors.muted),
+        ),
       ],
     );
   }
@@ -58,7 +63,11 @@ class EmptyPeopleCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Icon(Icons.person_search_rounded, color: AppColors.violet, size: 30),
+          const Icon(
+            Icons.person_search_rounded,
+            color: AppColors.violet,
+            size: 30,
+          ),
           const SizedBox(height: 9),
           const Text(
             'Пока всё тихо',
@@ -131,9 +140,12 @@ class GhostingFooter extends StatelessWidget {
         children: [
           Icon(Icons.bolt_rounded, color: AppColors.lime, size: 14),
           SizedBox(width: 5),
-          Text(
-            'GHOSTING · данные только на этом устройстве',
-            style: TextStyle(fontSize: 10, color: Color(0xFF77737F)),
+          Flexible(
+            child: Text(
+              'GHOSTING · данные только на этом устройстве',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 10, color: Color(0xFF77737F)),
+            ),
           ),
         ],
       ),

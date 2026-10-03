@@ -1,3 +1,4 @@
+// Показывает профиль пользователя, его ранг доверия и личную карточку.
 import 'package:flutter/material.dart';
 
 import '../models/tracked_person.dart';
